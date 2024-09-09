@@ -55,7 +55,7 @@ use Illuminate\Support\Facades\Session;
                         <tr id="todo-item-<?= $currTodoId ?>" class="odd:bg-gray-300 even:bg-gray-200">
                             <td style="font-weight:bold"><?= $currTodoId ?></td>
                             <td>
-                                <input type="text" id="todo-<?= $currTodoId ?>-title" value="<?= $todo['title'] ?>" style="height:28px;" class="w-full px-2 rounded" disabled>
+                                <input type="text" id="todo-<?= $currTodoId ?>-description" value="<?= $todo['description'] ?>" style="height:28px;" class="w-full px-2 rounded" disabled>
                             </td>
                             <td class="flex justify-between">
                             <td class="flex justify-between gap-1">
@@ -90,8 +90,9 @@ use Illuminate\Support\Facades\Session;
         Create a new todo
     </div>
     <form action="/todos" method="POST">
-        <?= csrf_field() ?>
-        <input type="text" name="title" placeholder="Enter todo title" class="w-full p-2 mb-2 rounded border-solid border-2 border-black" required>
+        @csrf
+        <input type="hidden" name="user_id" value="<?= Session::get('user_id') ?>">
+        <input type="text" name="description" placeholder="Enter todo description" class="w-full p-2 mb-2 rounded border-solid border-2 border-black" required>
         <div class="flex justify-between gap-1">
             <button type="button" class="btn-close w-16" onclick="document.getElementById('new-todo-dialog').close()">Close</button>
             <button type="submit" class="btn-submit flex-grow">Create</button>
@@ -103,9 +104,10 @@ use Illuminate\Support\Facades\Session;
     <div class="text-center mb-2">
         Enter new todo title
     </div>
-    <form action="/todos/id/title" method="POST">
-        <?= csrf_field() ?>
-        <input type="text" name="title" placeholder="Enter todo title" class="w-full p-2 mb-2 rounded border-solid border-2 border-black">
+    <form action="/todos/id/description" method="POST">
+        @csrf
+        <input type="hidden" name="user_id" value="<?= Session::get('user_id') ?>">
+        <input type="text" name="description" placeholder="Enter todo description" class="w-full p-2 mb-2 rounded border-solid border-2 border-black">
         <div class="flex justify-between gap-1">
             <button type="button" class="btn-close w-16" onclick="document.getElementById('edit-todo-dialog').close()">Close</button>
             <button type="submit" class="btn-submit flex-grow">Save</button>
@@ -114,69 +116,72 @@ use Illuminate\Support\Facades\Session;
 </dialog>
 
 <script>
-  // listener to close dialog when clicked outside the dialog bounds
-  document.querySelectorAll('dialog').forEach(dialog => {
-    dialog.addEventListener('click', function(e) {
-      if (e.target.tagName !== 'DIALOG')
-        return;
+    // listener to close dialog when clicked outside the dialog bounds
+    document.querySelectorAll('dialog').forEach(dialog => {
+        dialog.addEventListener('click', function(e) {
+            if (e.target.tagName !== 'DIALOG')
+                return;
 
-      const rect = e.target.getBoundingClientRect();
-      const clickedInDialog = (
-        rect.top <= e.clientY &&
-        e.clientY <= rect.top + rect.height &&
-        rect.left <= e.clientX &&
-        e.clientX <= rect.left + rect.width
-      );
+            const rect = e.target.getBoundingClientRect();
+            const clickedInDialog = (
+                rect.top <= e.clientY &&
+                e.clientY <= rect.top + rect.height &&
+                rect.left <= e.clientX &&
+                e.clientX <= rect.left + rect.width
+            );
 
-      if (clickedInDialog === false)
-        e.target.close();
+            if (clickedInDialog === false)
+                e.target.close();
+        });
     });
-  });
 
-  // THIS IS TO HANDLE FORM SUBMISSIONS VIA AJAX
-  window.addEventListener('DOMContentLoaded', function() {
-    const todoForms = document.querySelectorAll('form[action^="/todos"]');
-    todoForms.forEach(form => {
-      form.addEventListener('submit', function(event) {
-        event.preventDefault();
+    // THIS IS TO HANDLE FORM SUBMISSIONS VIA AJAX
+    window.addEventListener('DOMContentLoaded', function() {
+        const todoForms = document.querySelectorAll('form[action^="/todos"]');
+        todoForms.forEach(form => {
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
 
-        const formData = new FormData(this); // type: FormData
-        const url = this.action;
+                const formData = new FormData(this); // type: FormData
+                const url = this.action;
 
-        fetch(url, {
-            method: 'POST',
-            body: formData
-          })
-          .then(response => response.json()) // Parse JSON response
-          .then(data => {
-            // Handle successful response
-            if (data.status === 200) { 
-              window.location.reload();
-            } 
-            // Handle error response
-            else if (data.status === 400) { 
-              alert('An error occurred: ' + data.message);
-            } else { 
-              console.error('What the fuck:', data.status);
-            }
-          })
-          .catch(error => { // Handle network errors
-            console.error('Network error:', error);
-            alert('An error occurred during the request.');
-          });
-      });
+                alert("sending: \n" + formData.get('user_id'));
+                fetch(
+                        url, {
+                            method: 'POST',
+                            body: formData
+                        }
+                    )
+                    .then(response => console.log('response:', response.json())) // Parse JSON response
+                    .then(data => {
+                        // Handle successful response
+                        if (data.status === 201) {
+                            window.location.reload();
+                        }
+                        // Handle error response
+                        else if (data.status === 400) {
+                            alert('An error occurred: ' + data.message);
+                        } else {
+                            console.error('What the fuck:', data.status);
+                        }
+                    })
+                    .catch(error => { // Handle network errors
+                        console.error('Network error:', error);
+                        alert('An error occurred during the request.');
+                    });
+            });
+        });
     });
-  });
 
-  function openEditDialogTitle(id) {
-    document.querySelector('#edit-todo-dialog form').action = `/todos/${id}/title`;
-    const oldTitle = document.getElementById(`todo-${id}-title`).value;
-    document.querySelector('#edit-todo-dialog input[name="title"]').value = oldTitle;
-    document.getElementById('edit-todo-dialog').showModal();
-  }
+    function openEditDialogTitle(id) {
+        document.querySelector('#edit-todo-dialog form').action = `/todos/${id}/title`;
+        const oldTitle = document.getElementById(`todo-${id}-title`).value;
+        document.querySelector('#edit-todo-dialog input[name="title"]').value = oldTitle;
+        document.getElementById('edit-todo-dialog').showModal();
+    }
 
-  function openCreateTodoDialog() {
-    document.getElementById('new-todo-dialog').showModal();
-  }
+    function openCreateTodoDialog() {
+        document.getElementById('new-todo-dialog').showModal();
+    }
 </script>
 @endsection

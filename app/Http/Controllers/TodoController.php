@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Todo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
 class TodoController extends Controller
@@ -36,6 +37,7 @@ class TodoController extends Controller
      */
     public function create(Request $request)
     {
+        Log::info("kontol" . $request);
         //validate the request
         $request->validate([
             'user_id' => 'required|integer',
@@ -47,11 +49,38 @@ class TodoController extends Controller
             'user_id' => $request->user_id,
             'description' => $request->description,
         ]);
+        Log::info("berak");
+
+        return response()->redirectTo('/todos')->with('todos', $todo);
+    }
+
+    public function update(Request $request) 
+    {
+        //validate the request
+        $request->validate([
+            'user_id' => 'required|integer',
+            'todo_id' => 'required|integer',
+            'description' => 'required|string',
+        ]);
+
+        //checks whether the passed todo exists and belongs to the user
+        $todo = Todo::find($request->todo_id);
+        if (!$todo || $todo->user_id !== $request->user_id) {
+            return response()->json([
+                //same message to protect confidentiality
+                'message' => 'todo not found',
+            ], 404);
+        }
+
+        //updates the todo
+        $todo->update([
+            'description' => $request->description,
+        ]);
 
         return response()->json([
-            'message' => 'todo successfully created',
+            'message' => 'todo successfully updated',
             'data' => $todo,
-        ], 201);
+        ], 200);
     }
 
     /**

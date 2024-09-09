@@ -12,6 +12,7 @@ class Todo extends Model
     protected $primaryKey = 'todo_id';
 
     protected $fillable = [
+        'user_id',
         'description',
         'is_completed',
     ];
