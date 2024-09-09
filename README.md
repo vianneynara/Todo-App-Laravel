@@ -42,7 +42,7 @@ ALTER DATABASE todolist OWNER TO todolist;
 6. Creating new TODO
    ![creating new todo](images/r-creating-new-todo.png)
 7. New TODO created
-   ![New TODO created](images/r-new-todo-created)
+   ![New TODO created](images/r-new-todo-created.png)
 8. Toggling TODO status
    ![toggling todo](images/r-toggling-todo.png)
    ![toggled a todo](images/r-toggled-todo.png)
