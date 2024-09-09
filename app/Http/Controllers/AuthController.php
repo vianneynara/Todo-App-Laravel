@@ -102,4 +102,14 @@ class AuthController extends Controller
             'message' => 'successfully logged out',
         ], 200);
     }
+
+    public function showLoginPage()
+    {
+        return view('auth.login');
+    }
+
+    public function showRegistrationPage()
+    {
+        return view('auth.register');
+    }
 }
