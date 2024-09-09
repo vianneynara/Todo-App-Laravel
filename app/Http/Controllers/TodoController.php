@@ -37,7 +37,7 @@ class TodoController extends Controller
      */
     public function create(Request $request)
     {
-        Log::info("kontol" . $request);
+        // Log::info("kontol" . $request);
         //validate the request
         $request->validate([
             'user_id' => 'required|integer',
@@ -89,16 +89,20 @@ class TodoController extends Controller
      * @param mixed $todo_id
      * @return mixed|\Illuminate\Http\JsonResponse
      */
-    public function toggleCompletion(Request $request, $todo_id)
+    public function toggleCompletion(Request $request)
     {
+        Log::info("masuk method");
         //validate the request
         $request->validate([
             'user_id' => 'required|integer',
+            'todo_id' => 'required|integer',
         ]);
+        Log::info("validated");
 
         //checks whether the passed todo exists and belongs to the user
-        $todo = Todo::find($todo_id);
-        if (!$todo || $todo->user_id !== $request->user_id) {
+        $todo = Todo::find($request->todo_id);
+        Log::info($todo);
+        if (!$todo) {
             return response()->json([
                 //same message to protect confidentiality
                 'message' => 'todo not found',
@@ -109,11 +113,17 @@ class TodoController extends Controller
         $todo->update([
             'is_completed' => !$todo->is_completed,
         ]);
+        Log::info("updated");
 
+        // return response()->json([
+        //     'message' => 'todo successfully updated',
+        //     'data' => $todo,
+        // ], 200);
+        
         return response()->json([
             'message' => 'todo successfully updated',
             'data' => $todo,
-        ], 200);
+        ], 201);
     }
 
     /**
@@ -122,15 +132,16 @@ class TodoController extends Controller
      * @param mixed $id
      * @return mixed|\Illuminate\Http\JsonResponse
      */
-    public function delete(Request $request, $id) {
+    public function delete(Request $request) {
         //validate the request
         $request->validate([
             'user_id' => 'required|integer',
+            'todo_id' => 'required|integer'
         ]);
-
         //checks whether the passed todo exists and belongs to the user
-        $todo = Todo::find($id);
-        if (!$todo || $todo->user_id !== $request->user_id) {
+        $todo = Todo::find($request->todo_id);
+
+        if (!$todo) {
             return response()->json([
                 //same message to protect confidentiality
                 'message' => 'todo not found',
@@ -140,9 +151,11 @@ class TodoController extends Controller
         //deletes the todo
         $todo->delete();
 
-        return response()->json([
-            'message' => 'todo successfully deleted',
-        ], 200);
+        // return response()->json([
+        //     'message' => 'todo successfully deleted',
+        // ], 200);
+
+        return response()->redirectTo('/todos')->with('todos', $todo);
     }
 
     /**

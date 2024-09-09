@@ -60,14 +60,18 @@ use Illuminate\Support\Facades\Session;
                             <td class="flex justify-between">
                             <td class="flex justify-between gap-1">
                                 <button class="btn" onclick="openEditDialogTitle(<?= $currTodoId ?>)">✏️</button>
-                                <form action="/todos/<?= $currTodoId ?>/toggle-status" method="POST">
-                                    <?= csrf_field() ?>
+                                <form action="/todos/toggle" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="user_id" value="{{ Session::get('user_id') }}">
+                                    <input type="hidden" name="todo_id" value="{{ $currTodoId }}">
                                     <button type="submit" class="btn">
-                                        <?= $todo['isDone'] == 0 ? '🔲' : '✔️' ?>
+                                        <?= $todo['is_completed'] == false ? '🔲' : '✔️' ?>
                                     </button>
                                 </form>
-                                <form action="/todos/<?= $currTodoId ?>/delete" method="POST">
-                                    <?= csrf_field() ?>
+                                <form action="/todos/delete" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="user_id" value="{{ Session::get('user_id') }}">
+                                    <input type="hidden" name="todo_id" value="{{ $currTodoId }}">
                                     <button type="submit" class="btn-close">
                                         ❌
                                     </button>
@@ -145,7 +149,6 @@ use Illuminate\Support\Facades\Session;
                 const formData = new FormData(this); // type: FormData
                 const url = this.action;
 
-                alert("sending: \n" + formData.get('user_id'));
                 fetch(
                         url, {
                             method: 'POST',
@@ -165,9 +168,9 @@ use Illuminate\Support\Facades\Session;
                             console.error('What the fuck:', data.status);
                         }
                     })
+                    // WHAT THE FUCK HAPPENED HERE?
                     .catch(error => { // Handle network errors
-                        console.error('Network error:', error);
-                        alert('An error occurred during the request.');
+                        window.location.reload();
                     });
             });
         });

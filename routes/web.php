@@ -15,5 +15,6 @@ Route::get('/register', [AuthController::class, 'showRegistrationPage'])->name('
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/todos', [TodoController::class, 'showTodoPage'])->name('todos');
 Route::post('/todos', [TodoController::class, 'create']);
-Route::get('/todos/{todo_id}/toggle', [TodoController::class, 'toggleCompletion']);
-Route::get('/todos/{todo_id}/delete', [TodoController::class, 'delete']);
+Route::post('/todos/toggle', [TodoController::class, 'toggleCompletion']);
+Route::post('/todos/delete', [TodoController::class, 'delete']);
+// Route::delete('/todos/{todo_id}', [TodoController::class, 'delete']);
