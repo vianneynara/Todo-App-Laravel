@@ -9,6 +9,7 @@
         </div>
         <div class="flex justify-center my-8">
             <form action="/login" method="post">
+                @csrf
                 <table>
                     <tr>
                         <td class="w-[140px]">

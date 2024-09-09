@@ -41,10 +41,7 @@ class AuthController extends Controller
         Session::put('user_id', $user->user_id);
         Session::put('username', $user->username);
 
-        return response()->json([
-            'message' => 'successfully logged in',
-            'data' => $user,
-        ], 200);
+        return response()->redirectTo('/todos');
     }
     
     /**
@@ -64,6 +61,7 @@ class AuthController extends Controller
         $existingUser = User::where('username', $request->username)->first();
         if ($existingUser) {
             return response()->json([
+                'status' => 400,
                 'message' => 'username already taken',
             ], 400);
         }
@@ -75,22 +73,21 @@ class AuthController extends Controller
         ]);
 
         return response()->json([
+            'status' => 201,
             'message' => 'user successfully created',
             'data' => $user,
         ], 201);
     }
 
-    public function logout(Request $request)
+    public function logout()
     {
-        //validate the request
-        $request->validate([
-            'user_id' => 'required|integer',
-        ]);
-
+        $user_id = Session::get('user_id');
+        
         //checks whether the user exists
-        $user = User::find($request->user_id);
+        $user = User::find($user_id);
         if (!$user) {
             return response()->json([
+                'status' => 404,
                 'message' => 'user not found',
             ], 404);
         }
@@ -98,9 +95,7 @@ class AuthController extends Controller
         //clears the session
         Session::flush();
 
-        return response()->json([
-            'message' => 'successfully logged out',
-        ], 200);
+        return redirect('/login');
     }
 
     public function showLoginPage()

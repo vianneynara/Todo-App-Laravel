@@ -15,13 +15,13 @@
                         <td class="w-[140px]">
                             <label for="username">Username</label>
                         </td>
-                        <td><input type="text" id="username" name="username" required></td>
+                        <td><input type="text" id="username" name="username" autocomplete="username" required></td>
                     </tr>
                     <tr>
                         <td>
                             <label for="password">Password</label>
                         </td>
-                        <td><input type="password" id="password" name="password" required></td>
+                        <td><input type="password" id="password" name="password" autocomplete="password" required></td>
                     </tr>
                     <tr>
                         <td>

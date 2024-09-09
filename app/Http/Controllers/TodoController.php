@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Todo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 
 class TodoController extends Controller
 {
@@ -113,5 +114,21 @@ class TodoController extends Controller
         return response()->json([
             'message' => 'todo successfully deleted',
         ], 200);
+    }
+
+    /**
+     * Returns the page with the corresponding session data.
+     */
+    public function showTodoPage() 
+    {
+        $user = Session::get('user_id');
+        if ($user === null) {
+            return redirect('/login');
+        } else {
+            $todos = Todo::where('user_id', $user)->get();
+            return view('main.todos', [
+                'todos' => $todos
+            ]);
+        }
     }
 }
